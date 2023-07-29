@@ -40,15 +40,22 @@ Só que no `test_scenario_three` ele não atende a essa condição da pontuaçã
 
 - O customer success de id `999` está ausente e seria necessário ele estar disponivel para atender todos os customers que possuem o valor da pontuação inferior ao valor dele (`998`)
 
-- No teste é esperado o retorno do ID `998` que é o customer success que atenderia os 10_000 clientes com score `998`
+- No teste é esperado o retorno do ID `998` que é o customer success que atenderia os `10_000` clientes com score `998`
 
-O que seria a regra de negócio correta:
+O que seria a regra de negócio correta ?
 
 - O código aceitar pontuações de clientes `<=` a pontuação do customer success ?
 
 - O teste retornar 0 pois nenhum cliente poderia ser atendido já que na descrição do teste é solicitado uma pontuação do customer success `>` que a do cliente ?
 
-Uma outra dúvida é que no `test_scenario_three` foi usado o `Timeout`.
+Outro ponto sobre o mesmo teste `test_scenario_three`
 
-- A intenção dele é simular um teste de performance ?
-  - Minha dúvida é por conta de que na minha máquina eu dificilmente algum problema de performance, a menos que o algoritmos estivesse bastante mal otimizado.
+- Ao tentar criar a validação para a premissa `0 < nível do cs < 10.000` o teste falha, pois o o teste cria `10_000` customer success de nivel `998` enquanto que a premissa `0 < id do cs < 1.000` permite até o customer success de id `1.000`
+
+
+
+Evitei de atualizar os testes por conta dessa expectativa `Testes. Você pode adicionar novos testes, mas sem alterar o pacote original`
+
+Mas ao meu ver algumas premissas não serão atendidas corretamente se os testes não forem atualizados, como as que descrevi acima. 
+
+O que seria o ideal por aqui a se feito por aqui, atualizar os teste ou alterar a premissa/regra de negócio ? :thinking:
