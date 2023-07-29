@@ -1,5 +1,7 @@
 require 'minitest/autorun'
 require 'timeout'
+require 'byebug'
+require 'pry-byebug'
 
 class CustomerSuccessBalancing
   def initialize(customer_success, customers, away_customer_success)
@@ -10,6 +12,16 @@ class CustomerSuccessBalancing
 
   # Returns the ID of the customer success with most customers
   def execute
+    return available_customer_success.first[:id] if available_customer_success.count == 1
+    return 0 if available_customer_success.count.zero?
+
+    var = customer_success_that_attends_most_customers
+    return var.first[:id] if var.count == 1
+
+    binding.pry
+
+    # return customer_success_that_attends_most_customers[:id]
+
     # this avoid count customers that was already attended by another customers success
     last_customer_success_score = 0
 
@@ -48,6 +60,24 @@ class CustomerSuccessBalancing
 
   attr_reader :customer_success, :customers, :away_customer_success
 
+  def customer_success_that_attends_most_customers
+    sorted_available_customer_success = available_customer_success.sort_by do |available_cs|
+      available_cs[:score]
+    end
+
+    previous_cs_score = 0
+
+    available_cs_attends = sorted_available_customer_success.group_by do |available_cs|
+      customer_attended_by_available_cs = customers.select do |customer|
+        customer[:score] <= available_cs[:score] && customer[:score] > previous_cs_score
+      end
+
+      previous_cs_score = available_cs[:score]
+
+      customer_attended_by_available_cs.count
+    end
+  end
+
   def available_customer_success
     @available_customer_success ||= filter_for_available_customer_success_and_sort
   end
@@ -57,7 +87,13 @@ class CustomerSuccessBalancing
       away_customer_success.include?(cs[:id])
     end
 
-    available_cs.sort_by { |cs| cs[:score] }
+    customer_minimum_score = customers.min_by { |customer| customer[:score] }[:score]
+
+    customer_maximum_score = customers.max_by { |customer| customer[:score] }[:score]
+
+    available_cs.select do |cs|
+      cs[:score] >= customer_minimum_score || cs[:score] >= customer_maximum_score
+    end
   end
 
   def sorted_customers
