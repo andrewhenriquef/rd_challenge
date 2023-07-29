@@ -10,6 +10,8 @@ class CustomerSuccessBalancing
 
   # Returns the ID of the customer success with most customers
   def execute
+    return 0 if invalid_ids? || invalid_scores?
+
     case available_customer_success.count
     when 1 then return available_customer_success.first[:id]
     when 0 then return 0
@@ -65,6 +67,16 @@ class CustomerSuccessBalancing
     available_cs_by_count_of_custumers_attended.max_by do |customers_attended, available_cs_group|
       customers_attended
     end
+  end
+
+  def invalid_ids?
+    customer_success.any? { |cs| cs[:id].negative? || cs[:id].zero? || cs[:id] > 1_000_000 } ||
+      customers.any? { |c| c[:id].negative? || c[:id].zero? || c[:id] > 10_000 }
+  end
+
+  def invalid_scores?
+    customer_success.any? { |cs| cs[:score].negative? || cs[:score].zero? || cs[:score] > 10_000 } ||
+      customers.any? { |c| c[:score].negative? || c[:score].zero? || c[:score] > 100_000 }
   end
 end
 
@@ -142,7 +154,59 @@ class CustomerSuccessBalancingTests < Minitest::Test
     assert_equal 1, balancer.execute
   end
 
+  def test_scenario_nine
+    balancer = CustomerSuccessBalancing.new(
+      build_scores_with_negative_ids([60, 40, 95, 75]),
+      build_scores([90, 70, 20, 40, 60, 10]),
+      [2, 4]
+    )
+
+    assert_equal 0, balancer.execute
+  end
+
+  def test_scenario_ten
+    balancer = CustomerSuccessBalancing.new(
+      build_scores([60, 40, 95, 75]),
+      build_scores_with_negative_ids([90, 70, 20, 40, 60, 10]),
+      [2, 4]
+    )
+
+    assert_equal 0, balancer.execute
+  end
+
+  def test_scenario_eleven
+    balancer = CustomerSuccessBalancing.new(
+      build_negative_scores([60, 40, 95, 75]),
+      build_scores([90, 70, 20, 40, 60, 10]),
+      [2, 4]
+    )
+
+    assert_equal 0, balancer.execute
+  end
+
+  def test_scenario_twelve
+    balancer = CustomerSuccessBalancing.new(
+      build_scores([60, 40, 95, 75]),
+      build_negative_scores([90, 70, 20, 40, 60, 10]),
+      [2, 4]
+    )
+
+    assert_equal 0, balancer.execute
+  end
+
   private
+
+  def build_scores_with_negative_ids(scores)
+    scores.map.with_index do |score, index|
+      { id: -index, score: score }
+    end
+  end
+
+  def build_negative_scores(scores)
+    scores.map.with_index do |score, index|
+      { id: index + 1, score: -score }
+    end
+  end
 
   def build_scores(scores)
     scores.map.with_index do |score, index|
