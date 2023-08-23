@@ -23,13 +23,13 @@ cd ruby
 Para rodar a suíte toda de testes use o comando abaixo
 
 ```bash
-ruby -I test customer_success_balancing.rb
+ruby test/customer_success_balancing_tests.rb
 ```
 
 Para rodar algum teste em específico
 
 ```bash
-ruby -I test customer_success_balancing.rb --name test_scenario_two
+ruby test/customer_success_balancing_tests.rb --name test_scenario_two
 ```
 
 ## Dúvidas, ânseios sobre o "projeto/teste"
@@ -56,6 +56,6 @@ Outro ponto sobre o mesmo teste `test_scenario_three`
 
 Evitei de atualizar os testes por conta dessa expectativa `Testes. Você pode adicionar novos testes, mas sem alterar o pacote original`
 
-Mas ao meu ver algumas premissas não serão atendidas corretamente se os testes não forem atualizados, como as que descrevi acima. 
+Mas ao meu ver algumas premissas não serão atendidas corretamente se os testes não forem atualizados, como as que descrevi acima.
 
 O que seria o ideal por aqui a se feito por aqui, atualizar os teste ou alterar a premissa/regra de negócio ? :thinking:
